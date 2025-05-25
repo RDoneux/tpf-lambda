@@ -8,7 +8,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "deploy": "npm run build && cd infra && pulumi up --yes"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.149",

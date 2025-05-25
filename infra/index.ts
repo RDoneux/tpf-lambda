@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import { saveCharacter } from "./src/save-character";
 import { loadCharacter } from "./src/load-character";
+import { searchSpell } from "./src/search-spell";
 import { addCorsOptions } from "./src/utils/cors";
 
 const infrastructureStack = new pulumi.StackReference(
@@ -28,7 +29,7 @@ const resourcePrefix = `${projectName}-${serviceName}`;
 // Create an AWS resource (S3 Bucket)
 // const bucket = new aws.s3.BucketV2(`${resourcePrefix}-backup`);
 
-const resource = new aws.apigateway.Resource(
+const characterResource = new aws.apigateway.Resource(
   `${resourcePrefix}-character-resource`,
   {
     restApi: apiId,
@@ -37,10 +38,19 @@ const resource = new aws.apigateway.Resource(
   }
 );
 
+const spellsResource = new aws.apigateway.Resource(
+  `${resourcePrefix}-spells-resource`,
+  {
+    restApi: apiId,
+    parentId: rootResourceId,
+    pathPart: "spells",
+  }
+);
+
 const { optionsMethod, optionsMockIntegration } = addCorsOptions(
   resourcePrefix,
   apiId,
-  resource.id
+  characterResource.id
 );
 
 const { saveCharacterSheetMethod, saveCharacterSheetIntegration } =
@@ -49,7 +59,7 @@ const { saveCharacterSheetMethod, saveCharacterSheetIntegration } =
     bucketArn,
     bucketName,
     apiId,
-    resourceId: resource.id,
+    resourceId: characterResource.id,
   });
 
 const { loadCharacterSheetMethod, loadCharacterSheetIntegration } =
@@ -58,8 +68,16 @@ const { loadCharacterSheetMethod, loadCharacterSheetIntegration } =
     bucketArn,
     bucketName,
     apiId,
-    resourceId: resource.id,
+    resourceId: characterResource.id,
   });
+
+const { searchSpellMethod, searchSpellIntegration } = searchSpell({
+  resourcePrefix,
+  bucketArn,
+  bucketName,
+  apiId,
+  resourceId: spellsResource.id,
+});
 
 new aws.apigateway.Deployment(
   `${resourcePrefix}-deployment`,
@@ -72,6 +90,8 @@ new aws.apigateway.Deployment(
       saveCharacterSheetMethod,
       loadCharacterSheetIntegration,
       loadCharacterSheetMethod,
+      searchSpellIntegration,
+      searchSpellMethod,
       optionsMethod,
       optionsMockIntegration,
     ],

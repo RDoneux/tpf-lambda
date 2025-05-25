@@ -1,6 +1,7 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { corsHeaders, defaultCorsResponse } from "../common/cors";
 import { streamToString } from "../common/utils";
+import { ISpell } from "../interfaces/i-spell";
 
 const KEY = "spells/spellList.json";
 
@@ -90,35 +91,3 @@ function mapToISpell(spell: any): ISpell {
     material: spell.material,
   };
 }
-
-export interface ISpell {
-  name: string;
-  castingTime: string;
-  range: string;
-  components: ISpellComponents;
-  duration: string;
-  school: SpellSchool;
-  description: string | null;
-  page: string;
-  material: string;
-}
-
-export interface ISpellComponents {
-  verbal: boolean;
-  somatic: boolean;
-  material: boolean;
-  focus: boolean;
-  divineFocus: boolean;
-}
-
-export const SpellSchool = {
-  Abjuration: "Abjuration",
-  Conjuration: "Conjuration",
-  Divination: "Divination",
-  Enchantment: "Enchantment",
-  Evocation: "Evocation",
-  Illusion: "Illusion",
-  Necromancy: "Necromancy",
-  Transmutation: "Transmutation",
-} as const;
-export type SpellSchool = (typeof SpellSchool)[keyof typeof SpellSchool];

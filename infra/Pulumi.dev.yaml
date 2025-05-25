@@ -1,0 +1,5 @@
+encryptionsalt: v1:9XxwUcWsEOk=:v1:ZKJFsAUg/iZcTz5/:bnOIU0dg9xrbFhlEESajfxxtvwKfIA==
+config:
+  aws:region: eu-west-2
+  tpf-lambda:projectname: character-sheet
+  tpf-lambda:servicename: lambda

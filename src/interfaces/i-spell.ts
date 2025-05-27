@@ -8,6 +8,7 @@ export interface ISpell {
   description: string | null;
   page: string;
   material: string;
+  target: string;
 }
 
 export interface ISpellComponents {

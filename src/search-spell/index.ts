@@ -95,5 +95,6 @@ function mapToISpell(spell: any): ISpell {
     description: spell.desc,
     page: spell.page,
     material: spell.material,
+    target: spell.aiming
   };
 }

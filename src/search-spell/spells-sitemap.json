@@ -1,0 +1,118 @@
+{
+  "_id": "spell-list",
+  "startUrl": ["https://www.d20srd.org/indexes/spells.htm"],
+  "selectors": [
+    {
+      "id": "Spell Links",
+      "parentSelectors": ["_root"],
+      "type": "SelectorLink",
+      "selector": "ul.column a",
+      "multiple": true,
+      "linkType": "linkFromHref"
+    },
+    {
+      "id": "name",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "h1",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "school",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "h4 a:nth-of-type(1)",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "components",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Components:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "castingTime",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Casting Time:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "range",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Range:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "effect",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Effect:'), tr:contains('Target:'),  tr:contains('Area:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "duration",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Duration:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "savingThrow",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Saving Throw:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "spellResistance",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Spell Resistance:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "level",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "tr:contains('Level:') td",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "description",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "body > p",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "material",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "h6:contains('Material Component') + p",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "focus",
+      "parentSelectors": ["Spell Links"],
+      "type": "SelectorText",
+      "selector": "h6:contains('Focus') + p",
+      "multiple": false,
+      "regex": ""
+    }
+  ]
+}

@@ -82,7 +82,7 @@ function mapToISpell(spell: any): ISpell {
   return {
     name: spell.name,
     school: spell.school,
-    castingTime: spell.casting_time,
+    castingTime: spell.castingTime,
     range: spell.range,
     components: {
       verbal: spell.components.includes("V"),
@@ -92,9 +92,10 @@ function mapToISpell(spell: any): ISpell {
       divineFocus: spell.components.includes("DF"),
     },
     duration: spell.duration,
-    description: spell.desc,
-    page: spell.page,
+    description: spell.description,
+    page: spell["Spell Links-href"],
     material: spell.material,
-    target: spell.aiming
+    effect: spell.effect,
+    savingThrow: spell.savingThrow,
   };
 }

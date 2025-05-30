@@ -3,6 +3,7 @@ import * as aws from "@pulumi/aws";
 import { saveCharacter } from "./src/save-character";
 import { loadCharacter } from "./src/load-character";
 import { searchSpell } from "./src/search-spell";
+import { searchMonster } from "./src/search-monster";
 import { addCorsOptions } from "./src/utils/cors";
 
 const infrastructureStack = new pulumi.StackReference(
@@ -26,9 +27,6 @@ const projectName = config.require("projectname");
 const serviceName = config.require("servicename");
 const resourcePrefix = `${projectName}-${serviceName}`;
 
-// Create an AWS resource (S3 Bucket)
-// const bucket = new aws.s3.BucketV2(`${resourcePrefix}-backup`);
-
 const characterResource = new aws.apigateway.Resource(
   `${resourcePrefix}-character-resource`,
   {
@@ -44,6 +42,15 @@ const spellsResource = new aws.apigateway.Resource(
     restApi: apiId,
     parentId: rootResourceId,
     pathPart: "spells",
+  }
+);
+
+const monstersResource = new aws.apigateway.Resource(
+  `${resourcePrefix}-monsters-resource`,
+  {
+    restApi: apiId,
+    parentId: rootResourceId,
+    pathPart: "monsters",
   }
 );
 
@@ -79,6 +86,14 @@ const { searchSpellMethod, searchSpellIntegration } = searchSpell({
   resourceId: spellsResource.id,
 });
 
+const { searchMonsterMethod, searchMonsterIntegration } = searchMonster({
+  resourcePrefix,
+  bucketArn,
+  bucketName,
+  apiId,
+  resourceId: monstersResource.id,
+});
+
 new aws.apigateway.Deployment(
   `${resourcePrefix}-deployment`,
   {
@@ -92,6 +107,8 @@ new aws.apigateway.Deployment(
       loadCharacterSheetMethod,
       searchSpellIntegration,
       searchSpellMethod,
+      searchMonsterIntegration,
+      searchMonsterMethod,
       optionsMethod,
       optionsMockIntegration,
     ],

@@ -85,8 +85,6 @@ function mapToIMonster(monster: any): IMonster {
     treasure: monster.treasure || "",
     alignment: monster.alignment || "",
     description: monster.description || "",
-    link: `https://www.dndbeyond.com/monsters/${monster.name
-      .replace(/\s+/g, "-")
-      .toLowerCase()}`,
+    link: monster.link || ""
   };
 }

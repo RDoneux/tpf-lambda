@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import { saveCharacter } from "./src/save-character";
 import { loadCharacter } from "./src/load-character";
+import { loadCharacterList } from "./src/load-character-list";
 import { searchSpell } from "./src/search-spell";
 import { searchMonster } from "./src/search-monster";
 import { addCorsOptions } from "./src/utils/cors";
@@ -78,6 +79,15 @@ const { loadCharacterSheetMethod, loadCharacterSheetIntegration } =
     resourceId: characterResource.id,
   });
 
+const { loadCharacterSheetListMethod, loadCharacterSheetListIntegration } =
+  loadCharacterList({
+    resourcePrefix,
+    bucketArn,
+    bucketName,
+    apiId,
+    resourceId: characterResource.id,
+  });
+
 const { searchSpellMethod, searchSpellIntegration } = searchSpell({
   resourcePrefix,
   bucketArn,
@@ -105,6 +115,8 @@ new aws.apigateway.Deployment(
       saveCharacterSheetMethod,
       loadCharacterSheetIntegration,
       loadCharacterSheetMethod,
+      loadCharacterSheetListIntegration,
+      loadCharacterSheetListMethod,
       searchSpellIntegration,
       searchSpellMethod,
       searchMonsterIntegration,

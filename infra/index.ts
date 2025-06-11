@@ -5,6 +5,7 @@ import { loadCharacter } from "./src/load-character";
 import { loadCharacterList } from "./src/load-character-list";
 import { searchSpell } from "./src/search-spell";
 import { searchMonster } from "./src/search-monster";
+import { createCamp } from "./src/camp/create-camp";
 import { addCorsOptions } from "./src/utils/cors";
 
 const infrastructureStack = new pulumi.StackReference(
@@ -52,6 +53,15 @@ const monstersResource = new aws.apigateway.Resource(
     restApi: apiId,
     parentId: rootResourceId,
     pathPart: "monsters",
+  }
+);
+
+const campResource = new aws.apigateway.Resource(
+  `${resourcePrefix}-camp-resource`,
+  {
+    restApi: apiId,
+    parentId: rootResourceId,
+    pathPart: "camp",
   }
 );
 
@@ -104,6 +114,14 @@ const { searchMonsterMethod, searchMonsterIntegration } = searchMonster({
   resourceId: monstersResource.id,
 });
 
+const { createCampMethod, createCampIntegration } = createCamp({
+  resourcePrefix,
+  bucketArn,
+  bucketName,
+  apiId,
+  resourceId: campResource.id,
+});
+
 new aws.apigateway.Deployment(
   `${resourcePrefix}-deployment`,
   {
@@ -123,6 +141,8 @@ new aws.apigateway.Deployment(
       searchMonsterMethod,
       optionsMethod,
       optionsMockIntegration,
+      createCampMethod,
+      createCampIntegration,
     ],
   }
 );

@@ -6,12 +6,13 @@ import { loadCharacterList } from "./src/load-character-list";
 import { searchSpell } from "./src/search-spell";
 import { searchMonster } from "./src/search-monster";
 import { createCamp } from "./src/camp/create-camp";
-import { addCorsOptions } from "./src/utils/cors";
+import { getCampDetails } from "./src/camp/get-camp-details";
+import { createResource } from "./src/utils/create-resource";
 
 const infrastructureStack = new pulumi.StackReference(
   "organization/tpf-infrastructure/dev"
 );
-const apiId: pulumi.Output<string> = infrastructureStack.getOutput(
+const restApi: pulumi.Output<string> = infrastructureStack.getOutput(
   "apiId"
 ) as pulumi.Output<string>;
 const rootResourceId: pulumi.Output<string> = infrastructureStack.getOutput(
@@ -29,120 +30,91 @@ const projectName = config.require("projectname");
 const serviceName = config.require("servicename");
 const resourcePrefix = `${projectName}-${serviceName}`;
 
-const characterResource = new aws.apigateway.Resource(
-  `${resourcePrefix}-character-resource`,
-  {
-    restApi: apiId,
-    parentId: rootResourceId,
-    pathPart: "character",
-  }
-);
-
-const spellsResource = new aws.apigateway.Resource(
-  `${resourcePrefix}-spells-resource`,
-  {
-    restApi: apiId,
-    parentId: rootResourceId,
-    pathPart: "spells",
-  }
-);
-
-const monstersResource = new aws.apigateway.Resource(
-  `${resourcePrefix}-monsters-resource`,
-  {
-    restApi: apiId,
-    parentId: rootResourceId,
-    pathPart: "monsters",
-  }
-);
-
-const campResource = new aws.apigateway.Resource(
-  `${resourcePrefix}-camp-resource`,
-  {
-    restApi: apiId,
-    parentId: rootResourceId,
-    pathPart: "camp",
-  }
-);
-
-const { optionsMethod, optionsMockIntegration } = addCorsOptions(
-  resourcePrefix,
-  apiId,
-  characterResource.id
-);
-
-const { saveCharacterSheetMethod, saveCharacterSheetIntegration } =
-  saveCharacter({
-    resourcePrefix,
-    bucketArn,
-    bucketName,
-    apiId,
-    resourceId: characterResource.id,
-  });
-
-const { loadCharacterSheetMethod, loadCharacterSheetIntegration } =
-  loadCharacter({
-    resourcePrefix,
-    bucketArn,
-    bucketName,
-    apiId,
-    resourceId: characterResource.id,
-  });
-
-const { loadCharacterSheetListMethod, loadCharacterSheetListIntegration } =
-  loadCharacterList({
-    resourcePrefix,
-    bucketArn,
-    bucketName,
-    apiId,
-    resourceId: characterResource.id,
-  });
-
-const { searchSpellMethod, searchSpellIntegration } = searchSpell({
-  resourcePrefix,
-  bucketArn,
-  bucketName,
-  apiId,
-  resourceId: spellsResource.id,
+// CREATE API RESOURCES
+const characterResourceId = createResource("character", {
+  restApi,
+  parentId: rootResourceId,
 });
 
-const { searchMonsterMethod, searchMonsterIntegration } = searchMonster({
-  resourcePrefix,
-  bucketArn,
-  bucketName,
-  apiId,
-  resourceId: monstersResource.id,
+const characterListResourceId = createResource("list", {
+  restApi,
+  parentId: characterResourceId,
 });
 
-const { createCampMethod, createCampIntegration } = createCamp({
-  resourcePrefix,
-  bucketArn,
-  bucketName,
-  apiId,
-  resourceId: campResource.id,
+const spellResourceId = createResource("spells", {
+  restApi,
+  parentId: rootResourceId,
 });
 
-new aws.apigateway.Deployment(
+const monsterResourceId = createResource("monsters", {
+  restApi,
+  parentId: rootResourceId,
+});
+
+const campResourceId = createResource("camp", {
+  restApi,
+  parentId: rootResourceId,
+});
+
+// CREATE LAMBDA FUNCTIONS
+const commonLambdaArgs = { bucketArn, bucketName, restApi };
+const saveCharacterLambdaArgs = saveCharacter({
+  ...commonLambdaArgs,
+  resourceId: characterResourceId,
+});
+
+const loadCharacterLambdaArgs = loadCharacter({
+  ...commonLambdaArgs,
+  resourceId: characterResourceId,
+});
+
+const loadCharacterListLambaArgs = loadCharacterList({
+  ...commonLambdaArgs,
+  resourceId: characterListResourceId,
+});
+
+const searchSpellLambdaArgs = searchSpell({
+  ...commonLambdaArgs,
+  resourceId: spellResourceId,
+});
+
+const searchMonsterLambdaArgs = searchMonster({
+  ...commonLambdaArgs,
+  resourceId: monsterResourceId,
+});
+
+const createCampLambdaArgs = createCamp({
+  ...commonLambdaArgs,
+  resourceId: campResourceId,
+});
+
+const createGetCampDetailsLambdaArgs = getCampDetails({
+  ...commonLambdaArgs,
+  resourceId: campResourceId,
+});
+
+// DEPOLOYMENT
+const deployment = new aws.apigateway.Deployment(
   `${resourcePrefix}-deployment`,
   {
-    restApi: apiId,
+    restApi,
+    description: `Deployment on ${new Date().toISOString()}`,
   },
   {
     dependsOn: [
-      saveCharacterSheetIntegration,
-      saveCharacterSheetMethod,
-      loadCharacterSheetIntegration,
-      loadCharacterSheetMethod,
-      loadCharacterSheetListIntegration,
-      loadCharacterSheetListMethod,
-      searchSpellIntegration,
-      searchSpellMethod,
-      searchMonsterIntegration,
-      searchMonsterMethod,
-      optionsMethod,
-      optionsMockIntegration,
-      createCampMethod,
-      createCampIntegration,
+      ...saveCharacterLambdaArgs,
+      ...loadCharacterLambdaArgs,
+      ...loadCharacterListLambaArgs,
+      ...searchSpellLambdaArgs,
+      ...searchMonsterLambdaArgs,
+      ...createCampLambdaArgs,
+      ...createGetCampDetailsLambdaArgs
     ],
   }
 );
+
+new aws.apigateway.Stage(`${resourcePrefix}-api-stage`, {
+  restApi,
+  stageName: "dev",
+  deployment: deployment.id,
+});

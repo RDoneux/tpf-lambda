@@ -22,7 +22,7 @@ export const handler = async (event: any) => {
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.BUCKET_NAME,
-        Key: `camps/${name}.json`,
+        Key: `camps/${code}.json`,
         Body: bodyToUpload,
         ContentType: "application/json",
       })
@@ -35,7 +35,6 @@ export const handler = async (event: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: "Camp created successfully",
         code,
       }),
     };

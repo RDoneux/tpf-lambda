@@ -4,10 +4,11 @@ import * as pulumi from "@pulumi/pulumi";
 export function addCorsOptions(
   resourcePrefix: string,
   apiId: pulumi.Input<string>,
-  resourceId: pulumi.Input<string>
+  resourceId: pulumi.Input<string>,
+  name: string
 ) {
   const optionsMethod = new aws.apigateway.Method(
-    `${resourcePrefix}-options-method`,
+    `${resourcePrefix}-options-method-${name}`,
     {
       restApi: apiId,
       resourceId: resourceId,
@@ -17,7 +18,7 @@ export function addCorsOptions(
   );
 
   const optionsMockIntegration = new aws.apigateway.Integration(
-    `${resourcePrefix}-options-mock-integration`,
+    `${resourcePrefix}-options-mock-integration-${name}`,
     {
       restApi: apiId,
       resourceId: resourceId,
@@ -31,7 +32,7 @@ export function addCorsOptions(
   );
 
   new aws.apigateway.MethodResponse(
-    `${resourcePrefix}-options-method-response`,
+    `${resourcePrefix}-options-method-response-${name}`,
     {
       restApi: apiId,
       resourceId: resourceId,
@@ -50,7 +51,7 @@ export function addCorsOptions(
   );
 
   new aws.apigateway.IntegrationResponse(
-    `${resourcePrefix}-options-integration-response`,
+    `${resourcePrefix}-options-integration-response-${name}`,
     {
       restApi: apiId,
       resourceId: resourceId,

@@ -1,4 +1,8 @@
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  ListObjectsV2Command,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { corsHeaders, defaultCorsResponse } from "../common/cors";
 import { streamToString } from "../common/utils";
 
@@ -14,15 +18,45 @@ export const handler = async (event: any) => {
   if (!key) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: "Missing bucket or key" }),
+      body: JSON.stringify({ message: "Missing key" }),
     };
   }
 
   try {
+    const listCharactersCommand = new ListObjectsV2Command({
+      Bucket: process.env.BUCKET_NAME,
+      Prefix: "character-sheets/",
+      Delimiter: "/",
+    });
+
+    const characterList = await s3.send(listCharactersCommand);
+    const matchingKeys = (characterList.Contents ?? [])
+      .map((object) => object.Key ?? "")
+      .filter((k) => k.startsWith(key.replace(/\.json$/, "")));
+
+    if (matchingKeys.length === 0) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({
+          message: "Character sheet not found",
+        }),
+      };
+    }
+
+    if (matchingKeys.length > 1) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          message: "Multiple character sheets found with the same key",
+          keys: matchingKeys,
+        }),
+      };
+    }
+
     const result = await s3.send(
       new GetObjectCommand({
         Bucket: process.env.BUCKET_NAME,
-        Key: key,
+        Key: matchingKeys[0],
       })
     );
 

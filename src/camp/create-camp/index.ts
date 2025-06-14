@@ -1,21 +1,16 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { corsHeaders, defaultCorsResponse } from "../../common/cors";
-import { Camp } from "./camp.model";
+import { ICamp, initialCampState } from "../../interfaces/i-camp";
 
 const s3 = new S3Client({ region: "eu-west-2" });
 
 export const handler = async (event: any) => {
   defaultCorsResponse(event);
 
-  const { name } = JSON.parse(event.body || "{}");
+  const { name, description } = JSON.parse(event.body || "{}");
   const code = generateCampCode();
 
-  const camp: Camp = {
-    details: {
-      name,
-      code,
-    },
-  };
+  const camp: ICamp = { ...initialCampState, details: { name, description, code } };
 
   try {
     const bodyToUpload = JSON.stringify(camp);

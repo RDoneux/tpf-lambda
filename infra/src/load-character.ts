@@ -15,6 +15,7 @@ export function loadCharacter(
       "s3:GetObject",
       "s3:HeadBucket",
       "s3:CreateBucket",
+      "s3:ListBucket"
     ],
     pathToDist: "../dist/load-character-sheet",
     httpMethod: "GET",

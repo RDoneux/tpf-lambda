@@ -15,6 +15,8 @@ export function saveCharacter(
       "s3:GetObject",
       "s3:HeadBucket",
       "s3:CreateBucket",
+      "s3:ListBucket",
+      "s3:DeleteObject",
     ],
     pathToDist: "../dist/save-character-sheet",
     httpMethod: "POST",

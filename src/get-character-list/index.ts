@@ -18,6 +18,7 @@ export const handler = async (event: any) => {
       .map((object) => object.Key ?? "")
       .map((key) => key.replace(/^character-sheets\//, ""))
       .map((key) => key.replace(/\.json$/, ""))
+      .map((key) => key.split("|:|")[0])
       .filter((key) => key !== "");
 
     return {
